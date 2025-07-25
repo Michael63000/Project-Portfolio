@@ -1,0 +1,4 @@
+*.mp4 filter=lfs diff=lfs merge=lfs -text
+2019_MCG4152_Movie_Team3.mp4 filter=lfs diff=lfs merge=lfs -text
+ELG[[:space:]]2336[[:space:]]-[[:space:]]A[[:space:]]Small[[:space:]]Device[[:space:]]for[[:space:]]a[[:space:]]Big[[:space:]]Heart.mp4 filter=lfs diff=lfs merge=lfs -text
+ELG[[:space:]]3336[[:space:]]-[[:space:]]Reach[[:space:]]for[[:space:]]the[[:space:]]Top.mp4 filter=lfs diff=lfs merge=lfs -text
