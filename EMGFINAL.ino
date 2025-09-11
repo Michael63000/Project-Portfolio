@@ -1,0 +1,58 @@
+#include <VarSpeedServo.h> 
+VarSpeedServo servo1;
+int algCounter = 0; //time the algorithm
+int servoTimer = 0; //time the servo macromovement
+
+//Exponential smoothing
+int x_i = 0; //raw data point from sensor
+int x_i_prev = 0; //previous raw data value value
+int s_i = 0; //smoothened data point for output to serial
+int s_i_prev = 0; //previous smoothened value
+int a = 0.5; //smoothing factor {0 < a < 1}, gives lowest MSE (mean square error)
+
+//Servo driver
+int MAX_VALUE = 134; //Max of 3 full strength EMG measurements
+int MAX_ANGLE = 135; //Max angle the servo will turn (fully closed hand)
+int MIN_ANGLE = 180;
+int normValue = 0; //Normalized value
+int mapped_value = 0; //Mapped value norm->speed
+bool status = true; //hand is open initially
+
+void setup() {
+  Serial.begin(9600);
+  servo1.attach(A1); //analog pin A1
+  servo1.slowmove(MIN_ANGLE, 150); //servo to position 0
+}
+void loop() {
+  int sensorValue = analogRead(A0); //sensor to analog pin A0
+ if(algCounter == 0){ //initial i = 0
+   s_i = sensorValue; //smoothened value is raw data value for first point i = 0
+   Serial.println(s_i); //output the i = 0 value
+   s_i_prev = s_i; //save s_i in s_(i-1)
+ }
+ else{ //i > 0
+   s_i = (a * sensorValue) + ((1 - a)*s_i_prev); //smoothened value eqn for i > 0
+   Serial.println(s_i); //output the smoothened value
+   s_i_prev = s_i; //save s_i for the i + 1 iteration
+ }
+  algCounter++; 
+
+  normValue = sensorValue / MAX_VALUE; //find normalized value from MVIC
+  if(normValue > 1){
+    normValue = 1; //restrict normalized value 0 < x < 1
+  }
+  mapped_value = map(normValue, 0, 1, 1, 200); //Map the normalized value between [0,1] to [1,255] for speed control
+  if(status){ //if hand status is open
+    servo1.slowmove(MAX_ANGLE, mapped_value);
+    if(servoTimer >= 500){ //Arbitrary time constant, makes it so that servo doesn't attempt to close before fully open
+      status = !status; //Hand status is now closed
+      servoTimer = 0; //Reset timer
+    }
+    
+  }
+  else{
+    servo1.slowmove(MIN_ANGLE, 200); //Open the hand at constant rate
+    status = !status; //Hand status is not open
+  }
+  delay(1); // delay in between reads for stability
+}
