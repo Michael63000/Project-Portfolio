@@ -55,7 +55,7 @@ void writeRegister(int deviceAddress, byte address, byte val) {
 }
 
 boolean hrmiGetData(byte addr, byte numBytes, byte* dataArray){
-  //Get data from heart rate monitor and fill dataArray byte with responce
+  //Get data from heart rate monitor and fill dataArray byte with response
   //Returns true if it was able to get it, false if not
   Wire.requestFrom(addr, numBytes);
   if (Wire.available()) {
